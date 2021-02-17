@@ -1,0 +1,84 @@
+This is a FORTRAN code that computes a complex impedance function Z(f)
+representing the impedance of Voigt circuits - electrical circuits made of
+resistors and capacitors (no inductances). Z(f) also represents the
+electrochemical impedance spectrum of an electrochemical cell. The input is a
+number of measured values Z_j of Z(f_j) at a few specified frequencies f_j.
+The values Z_j may contain measurement errors. The code computes a valid
+impedance function Z(f) that minimizes sum[|Z(f_j)-Z_j|^2] as well as the
+"certificate of optimality" that I call the "Caprini function". The impedance
+function Z(f) is computed in two ways (which agree in test cases I ran). The
+first way is a list of values Z(F_k) at 300 frequencies F_k equispaced on the
+log scale between min(f_j) and max(f_j). The second is the spectral
+representation of Z(f): Z(f) = R +s0/(2i*pi*f) + sum[s(j)/(pole(j)+2i*pi*f)].
+The program also computes 500 Monte-Carlo reconstructions of Z(f) simulating
+different realizations of random measurement errors to show the uncertainty in
+the reconstruction of Z(f). The algorithm is described in the paper by Yury
+Grabovsky "Reconstructing Stieltjes functions from their approximate values: a
+search for a needle in a hay stack."  See
+https://www.math.temple.edu/~yury/Stieltjes.pdf The FORTRAN source code
+implements the algorithm and the description below would be of little use
+without some understanding of the algorithm and what it does. 
+
+* The source needs to be compiled against the lapack libraries liblapack.a and
+librefblas.a. The lapack sources are available from www.netlib.org. (The
+directions for compiling lapack libraries are described there.) The compile
+command is
+gfortran Stieltjes_functions.f Voigt.f *.f90 <path>/liblapack.a <path>/librefblas.a
+where path is the path to lapack libraries meantioned above. The source needs
+to be compiled with gfortran 2 times in order to generate the .mod files from
+the nnls.f90 and constant.f90 modules. The second time there should be no
+compilation errors.
+
+* The code consists of the main program Voigt.f that gets the input, launches
+the algorithm, and writes output to text files. The algorithm uses my own code 
+contained in Stieltjes_functions.f and the included 3rd party software: 
+- NNLS.f90 by Alan Miller from https://jblevins.org/mirror/amiller
+  It solves nonnegative linear least squares problems. It is in public domain. 
+- normal.f90 by John Burkardt (GNU LGPL license) for generating independent
+  N(0,1) random variables. https://people.sc.fsu.edu/~jburkardt/f_src/normal/normal.html
+- Suitably modified BrentRoots by J-P Moreau (www.jpmoreau.fr) for root
+  finding (which is probably how it was meant to be used)
+- quicksort.f90 by M.J. Rutter (https://www.mjr19.org.uk/IT/sorts/)
+
+
+* No FORTRAN interface to graphics engine is implemented. The input is read
+from a text file Voigt_data.txt. The file must contain 3 columns. The first
+column is a list of frequencies f and the second and the third are real and
+imaginary parts, respectively, of the complex impedance function Z(f). It
+represents the impedance of electrical circuits made of resistors and
+capacitors (no inductances). It also represents the electrochemical impedance
+spectrum of an electrochemical cell. The number of lines in Voigt_data.txt is
+the number of measurements of Z(f) at different frequencies. The output is
+written to several text files (described below). I include a python program
+PythonGrapher.py written by Phillip Grabovsky (my son) that reads the output
+files and presents the results graphically. (See README for how to run it.)
+Of course, the output of the FORTRAN program can just as easily be read from
+the text files by any other program that has graphing capabilities. 
+Voigt_plot.png shows the graphical output of the PythonGrapher.
+
+* The main program Voigt.f reads the input data from the file Voigt_data.txt, 
+described above, and outputs the results to either 2 files W_extr.txt
+and spectral_measure.txt, or 3 files (add WMC.txt), or 5 files (add tC.txt 
+and wfix.txt).
+- W_extr.txt contains 3 columns. The first column is a column of 300
+  frequencies spaced logarithmically between the smallest frequency in data.txt
+  to the largest. The second and the third are real and imaginary
+  parts, respectively, of the complex impedance function Z(f).
+- WMC.txt contains real and imaginary parts of Z_k(f), k=1,500 Monte-Carlo
+  reconstructions of Z(f) showing the degree of uncertainty in the reconstructed
+  Z(f). 
+- spectral_measure.txt contains spectral representation of f(z). The first
+  line is either -1.0 R, or 0.0 R, indicating whether the certificate
+  of optimality (the graph of the Caprini function) is computed (-1=computed). 
+  The second line is 0.0 s0. The remaining lines are pole(j) and s(j) for 
+  Z(f) = R + s0/(2i*pi*f) + sum[s(j)/(pole(j)+2i*pi*f)]. 
+- tC.txt contains t(j) and C(t(j)), where t(j) is the discretization (on
+  the log scale of [0,+infty) and C(t) is the Caprini function certifying
+  optimality.
+- wfix.txt contains the "alternative data", which are close the the
+  original one but for which the output is certifiably optimal. Since the
+  original data is Z(f)+noise, the alternative data is also Z(f)+ a different
+  realization of the noise. The Monte-Carlo trials create 500 different
+  realization of the same level of noise and show the resulting impedance
+  reconstructions. 
+
