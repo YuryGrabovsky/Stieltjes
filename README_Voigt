@@ -33,7 +33,9 @@ compilation errors.
 the algorithm, and writes output to text files. The algorithm uses my own code 
 contained in Stieltjes_functions.f and the included 3rd party software: 
 - NNLS.f90 by Alan Miller from https://jblevins.org/mirror/amiller
-  It solves nonnegative linear least squares problems. It is in public domain. 
+  It solves nonnegative linear least squares problems. It is in public domain.
+  I had to change itmax from 3*n to 5*n, so that nnls does not exit as often
+  on iteration count.
 - normal.f90 by John Burkardt (GNU LGPL license) for generating independent
   N(0,1) random variables. https://people.sc.fsu.edu/~jburkardt/f_src/normal/normal.html
 - Suitably modified BrentRoots by J-P Moreau (www.jpmoreau.fr) for root
@@ -54,7 +56,7 @@ PythonGrapher.py written by Phillip Grabovsky (my son) that reads the output
 files and presents the results graphically. (See README for how to run it.)
 Of course, the output of the FORTRAN program can just as easily be read from
 the text files by any other program that has graphing capabilities. 
-Voigt_plot.png shows the graphical output of the PythonGrapher.
+Voigt_plot.jpg shows the graphical output of the PythonGrapher.
 
 * The main program Voigt.f reads the input data from the file Voigt_data.txt, 
 described above, and outputs the results to either 2 files W_extr.txt
