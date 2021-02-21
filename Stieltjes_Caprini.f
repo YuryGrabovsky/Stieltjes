@@ -31,7 +31,7 @@
       complex*16 eye
       real*8 pi,mar,tmin,tmax,rew,imw
       real*8 rezeta,imzeta,rez,imz,sgm,g,s0
-      integer nz,n_zeta,i,j,NMC,npd,mnd,ntC,numlm,ns
+      integer nz,n_zeta,i,j,NMC,npd,mnd,ntC,numlm,ns,eof,data_max
       logical status
       complex*16, allocatable::z(:)
       complex*16, allocatable::w(:)
@@ -39,6 +39,7 @@
       complex*16, allocatable::zeta(:)
       complex*16, allocatable::W_extr(:)
       complex*16, allocatable::WMC(:,:)
+      real*8, allocatable::VD(:,:)
       real*8, allocatable::t4C(:)
       real*8, allocatable::tC(:)
       real*8, allocatable::rtk(:)
@@ -47,7 +48,7 @@
       real*8, allocatable::locmins(:)
       real*8, allocatable::sigma(:)
 
-      parameter(mar=3.0,npd=1000,mnd=30)
+      parameter(mar=3.0,npd=1000,mnd=30,data_max=10000,NMC=500)
 ! mar=number of decades to go left past tmim
 ! npd=number of discretization points per decade
 ! nz=number of experimental measurements
@@ -59,28 +60,45 @@
       
 ! Input "experimental" data z,w and the list of extrapolation points zeta
 ! size(z)=size(w)=nz, size(zeta)=n_zeta
-      open(unit=18,file='data_sizes.txt')
-      read(18,*) nz
-      read(18,*) n_zeta
-      read(18,*) NMC 
-      close(18)
+c$$$      open(unit=18,file='data_sizes.txt')
+c$$$      read(18,*) nz
+c$$$      read(18,*) n_zeta
+c$$$      read(18,*) NMC 
+c$$$      close(18)
 c      write(6,*) nz,n_zeta,NMC
-      allocate(z(nz))
-      allocate(w(nz))
-      allocate(zeta(n_zeta))
+      allocate(VD(data_max,4))
       open(unit=11,file='exp_data.txt') ! 
-      do i=1,nz
-         read(11,*) rez,imz,rew,imw
-         z(i)=rez+eye*imz
-         w(i)=rew+eye*imw
-      end do
-      open(unit=21,file='extr_zs.txt') !
-      do i=1,n_zeta
-         read(21,*) rezeta,imzeta
-         zeta(i)=rezeta+eye*imzeta
+      do i=1,data_max
+         read(11,*,iostat=eof) rez,imz,rew,imw
+         if (eof<0) then ! end of file is reached
+            nz=i-1
+            exit
+         end if
+         VD(i,1)=rez
+         VD(i,2)=imz
+         VD(i,3)=rew
+         VD(i,4)=imw
       end do
       close(11)
+      allocate(z(nz))
+      allocate(w(nz))      
+      z=VD(1:nz,1)+eye*VD(1:nz,2)
+      w=VD(1:nz,3)+eye*VD(1:nz,4)
+
+      open(unit=21,file='extr_zs.txt') !
+      do i=1,data_max
+         read(21,*,iostat=eof) rezeta,imzeta
+         if (eof<0) then ! end of file is reached
+            n_zeta=i-1
+            exit
+         end if
+         VD(i,1)=rezeta
+         VD(i,2)=imzeta
+      end do
       close(21)
+      allocate(zeta(n_zeta))
+      zeta=VD(1:n_zeta,1)+eye*VD(1:n_zeta,2)
+
 
 ! Data has been read in. Allocate output arrays
 
