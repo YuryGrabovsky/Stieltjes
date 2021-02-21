@@ -60,10 +60,10 @@ Stieltjes_functions.f and the following included 3rd party software:
   Now after running the Fortran code the results can be plotted with
 > python -u PythonGrapher.py
 
-* The main program Stieltjes_Caprini.f reads the input data from three files
-exp_data.txt, extr_zs.txt, and data_sizes.txt (the latter is updated on the
-output), and outputs the results to either 3 files W_extr.txt, spectral_measure.txt, 
-and pout.txt, or 4 files (add WMC.txt) or 6 files (add tC.txt and wfix.txt).
+* The main program Stieltjes_Caprini.f reads the input data from two files
+exp_data.txt and extr_zs.txt and outputs the results to either 4 files 
+W_extr.txt, spectral_measure.txt, data_sizes.txt, and pout.txt, or 5 files 
+(add WMC.txt) or 7 files (add tC.txt and wfix.txt).
 - W_extr.txt contains real and imaginary parts of f(zeta_j) for
   some Stieltjes function f(z).
 - pout.txt contains real and imaginary parts of p in V(z), which is in a

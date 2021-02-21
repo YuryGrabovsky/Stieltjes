@@ -59,9 +59,9 @@ the text files by any other program that has graphing capabilities.
 Voigt_plot.jpg shows the graphical output of the PythonGrapher.
 
 * The main program Voigt.f reads the input data from the file Voigt_data.txt, 
-described above, and outputs the results to either 2 files W_extr.txt
-and spectral_measure.txt, or 3 files (add WMC.txt), or 5 files (add tC.txt 
-and wfix.txt).
+described above, and outputs the results to either 3 files data_sizes.txt, 
+W_extr.txt, and spectral_measure.txt, or 4 files (add WMC.txt), or 6 files 
+(add tC.txt and wfix.txt).
 - W_extr.txt contains 3 columns. The first column is a column of 300
   frequencies spaced logarithmically between the smallest frequency in data.txt
   to the largest. The second and the third are real and imaginary
