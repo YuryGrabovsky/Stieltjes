@@ -153,7 +153,7 @@ c      write(6,*) nz,n_zeta,NMC
       open(unit=18,file='data_sizes.txt')
       write(18,*) nz
       write(18,*) n_zeta
-      write(18,*) NMC ! this could change to 0
+      write(18,*) NMC ! this could change to 0 if data is exact
       close(18)
 
       stop
