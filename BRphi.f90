@@ -1,4 +1,9 @@
-!*****************************************************
+!* ------------------------------------------------- *
+!* Reference:  BORLAND MATHEMATICAL LIBRARY          *
+!*                                                   *
+!*                F90 version by J-P Moreau, Paris.  *
+!*                       (www.jpmoreau.fr)           *
+!* ------------------------------------------------- *
 !*              Brent Method Function                *
 !* ------------------------------------------------- *
 !* The purpose is to find a real root of a real      *
