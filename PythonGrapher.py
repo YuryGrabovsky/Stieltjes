@@ -11,7 +11,15 @@ from matplotlib.figure import Figure
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent, mode, dpi=100):
+    def __init__(self, parent, mode, status, dpi=100):
+        if status:
+            self.initializeNormally(parent, mode, dpi=100)
+        else:
+            self.disableCaprinis(parent, mode, dpi=100)
+        super(MplCanvas, self).__init__(self.fig)
+
+    #initialize normally with caprinis.
+    def initializeNormally(self, parent, mode, dpi=100):
         self.dataLabels = []
         self.lw = 1
         self.fig = Figure(dpi=dpi, constrained_layout=True)
@@ -36,7 +44,25 @@ class MplCanvas(FigureCanvasQTAgg):
             self.setPlotInfo(self.topCapriniAxes,"Caprini Function", "t/S", "")
             self.setPlotInfo(self.bottomCapriniAxes,"Zeros of the Caprini Function", "t/S", "")
 
-        super(MplCanvas, self).__init__(self.fig)
+    #initialize without caprinis because they shouldn't be shown.
+    def disableCaprinis(self, parent, mode, dpi=100):
+        self.dataLabels = []
+        self.lw = 1
+        self.axisDict = {}
+        self.fig = Figure(dpi=dpi, constrained_layout=True)
+        if(mode == "Voigt"):
+            gs = GridSpec(2, 1, figure=self.fig)
+            self.topVoigtAxes = self.fig.add_subplot(gs[0,0])
+            self.bottomVoigtAxes = self.fig.add_subplot(gs[1,0])
+            self.axisDict["TV"] = self.topVoigtAxes
+            self.axisDict["BV"] = self.bottomVoigtAxes
+            self.setPlotInfo(self.topVoigtAxes, "Real Part", "Freq/Hz", "Z Real/Ohm")
+            self.setPlotInfo(self.bottomVoigtAxes, "Imaginary Part", "Freq/Hz", "Z Imag/Ohm)")
+        elif(mode == "Nyquist"):
+            self.nyquistAxes = self.fig.add_subplot(111) #nyquist takes up whole left column
+            self.axisDict["N"] = self.nyquistAxes
+            self.setPlotInfo(self.nyquistAxes, "Nyquist Plot", "Re", "Im")
+
 
     def setGraphScale(self, axes, xMin, xMax, yMin, yMax):
         self.axisDict[axes].set_xlim(xMin, xMax)
@@ -83,18 +109,20 @@ class MplCanvas(FigureCanvasQTAgg):
         axes.set_xlabel(xTitle)
         axes.set_ylabel(yTitle)
 
+
 class StieltjesGraphWindow(Qt.QDialog):
     def __init__(self):
         super().__init__()#set up Qt
         self.topLevelLayout = Qt.QHBoxLayout()
         self.graphData = [[],[]] #set by populateData()
-        self.mode = self.detectMode() #is set by populateData()
+        self.mode, zetaFZeta = self.detectMode() #is set by populateData()
         self.sameCurve = False #set by user. whether the data lies on the extrapolation curve.
+        self.status, fZeta = self.detectStatus() #whether to show caprini functions
 
         #setup graphs!
         self.graph = Qt.QFrame()
         graphLayout = Qt.QVBoxLayout()
-        self.graphCanvas = MplCanvas(self,self.mode, dpi=100)
+        self.graphCanvas = MplCanvas(self,self.mode, self.status, dpi=100)
         toolbar = NavigationToolbar(self.graphCanvas, self)
         graphLayout.addWidget(toolbar)
         graphLayout.addWidget(self.graphCanvas)
@@ -106,29 +134,28 @@ class StieltjesGraphWindow(Qt.QDialog):
         graphLayout = Qt.QVBoxLayout()  #update topLevelLayout to include graphs!
         graphLayout.addWidget(self.graph)
         self.topLevelLayout.addItem(graphLayout)
-        self.populateData()      #take in txt file data and add it to graphs.
+        self.populateData(zetaFZeta, fZeta)      #take in txt file data and add it to graphs.
         self.setLayout(self.topLevelLayout)
         self.setWindowState(PySide2.QtCore.Qt.WindowState.WindowMaximized)
 
-    def populateData(self): #figure out graph contents
-        zetaFZeta=self.loadFileIntoNestedArrays('W_extr.txt')
+
+    def populateData(self, zetaFZeta, fZeta): #figure out graph contents
+        #populate data for correct graph
         if self.mode == "Nyquist":
-            self.populateNyquist(zetaFZeta)
+            self.populateNyquist(zetaFZeta, fZeta)
         elif self.mode == "Voigt":
-            self.populateVoigt(zetaFZeta)
-        else:
-            message = Qt.QMessageBox("Data File W_extr.txt must have 3 or 4 columns.")
-            message.exec_()
-        self.populateCaprinis()
+            self.populateVoigt(zetaFZeta, fZeta)
+        if(self.status):
+            self.populateCaprinis()
 
 
-    def populateNyquist(self, zetaFZeta): #update nyquist plot
+    def populateNyquist(self, zetaFZeta, fZeta): #update nyquist plot
         #Spectral rep and Extrapolation curves
         Z, W = [], []
         for row in zetaFZeta:
             Z.append(complex(row[0], row[1]))   #needed for spectral rep
             W.append(complex(row[2], row[3]))   #extrapolation
-        fZ = self.computeSpectralRep(Z)  #finish computing spectral rep
+        fZ = self.computeSpectralRep(Z, fZeta)  #finish computing spectral rep
         #Uncertainty curves
         dataSizes = self.loadFileIntoNestedArrays("data_sizes.txt")
         NMC = int(dataSizes[2][0])
@@ -145,7 +172,7 @@ class StieltjesGraphWindow(Qt.QDialog):
                     count=count+1
         #actually plot the results
         for j in range(NMC):
-            self.graphCanvas.drawLinLin("N",np.real(WMC[j]),np.imag(WMC[j]),"Uncertainty", "gray")
+            self.graphCanvas.drawLinLin("N",np.real(WMC[j]),np.imag(WMC[j]),"Uncertainty", "silver")
         self.graphCanvas.drawLinLin("N",np.real(W), np.imag(W), "Extrapolation", "orange") #graph extrapolation
         self.graphCanvas.drawLinLin("N",np.real(fZ), np.imag(fZ), "Spectral Rep", "cyan") #graph spectral rep
         #plot original points if extrap is on same curve is on original data.
@@ -159,8 +186,7 @@ class StieltjesGraphWindow(Qt.QDialog):
             self.graphCanvas.drawLinLinDots("N", wOrigX, wOrigY, "W Original", "black")
 
 
-    def computeSpectralRep(self, Z):
-        fZeta = self.loadFileIntoNestedArrays("spectral_measure.txt")
+    def computeSpectralRep(self, Z, fZeta):
         sk = [] #sk is the 2nd column of fzeta.
         tk = [] #tk is the 1st column of fzeta, w/out the 1st element
         for i in range(len(fZeta)):
@@ -181,14 +207,13 @@ class StieltjesGraphWindow(Qt.QDialog):
         # print the relative discrepancy between the original and the alternative
         # data.
 
-    def populateVoigt(self, zetaFZeta):
+    def populateVoigt(self, zetaFZeta, fZeta):
         # fZ exp data [freq,re(Z),im(Z)]; wfix=alternative data
         # f=all frequencies, F=Z(f) is the model
         # Z(n_zeta,2) is the extrapolation
         # EIS(f)=F_spectral(f), WZ(n_zeta,Nr)=monte-carlo
         dataSizes=self.loadFileIntoNestedArrays('data_sizes.txt');
         fZ1Split = self.loadFileIntoNestedArrays("Voigt_data.txt")
-        fZeta = self.loadFileIntoNestedArrays('spectral_measure.txt')
         wfixSplit = self.loadFileIntoNestedArrays("wfix.txt")
         Nr = int(dataSizes[2][0])
         #unpack data
@@ -248,10 +273,10 @@ class StieltjesGraphWindow(Qt.QDialog):
         for row in capriniData:
             tC.append(row[0])
             C.append(row[1])
-        self.graphCanvas.drawSemiLogX("TC", tC, C, "", "blue" ) #draw caprini
         self.graphCanvas.drawSemiLogX("TC",[tC[0],tC[len(tC)-1]],[0,0],"","red") #draw baseline
-        self.graphCanvas.drawSemiLogX("BC",tC, C, "", "blue")   #draw caprini mins
+        self.graphCanvas.drawSemiLogX("TC", tC, C, "", "blue" ) #draw caprini
         self.graphCanvas.drawSemiLogX("BC",[tC[0],tC[len(tC)-1]],[0,0],"","red") #draw baseline
+        self.graphCanvas.drawSemiLogX("BC",tC, C, "", "blue")   #draw caprini mins
         #scale the bottom graph to show zeros
         CMin, CMax = self.getgraphScale(C)
         self.graphCanvas.setGraphScale("BC",min(tC), max(tC), CMin, CMax)
@@ -275,11 +300,18 @@ class StieltjesGraphWindow(Qt.QDialog):
     def detectMode(self):
         zetaFZeta=self.loadFileIntoNestedArrays('W_extr.txt')
         if len(zetaFZeta[0]) == 4:
-            return "Nyquist"
+            return "Nyquist", zetaFZeta
         elif len(zetaFZeta[0]) == 3:
-            return "Voigt"
+            return "Voigt", zetaFZeta
         else:
-            return "UnknownData"
+            return "UnknownData", zetaFZeta
+
+    def detectStatus(self):
+        fZeta = self.loadFileIntoNestedArrays("spectral_measure.txt")
+        if(fZeta[0][0] != 0): #determine if caprinis should be shown.
+            return False, fZeta
+        else:
+            return True, fZeta
 
     def loadFileIntoNestedArrays(self, filename): #load a data file into a 2d array
         dataList = []
