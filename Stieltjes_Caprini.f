@@ -1,7 +1,7 @@
 !__________________________________________________________________________________
 !
 ! Author: Yury Grabovsky https://www.math.temple.edu/~yury
-! Last modified: Feb 14, 2021
+! Last modified: Feb 21, 2021
 ! This code is distributed under the GNU LGPL license.
 ! It is an example of using the driver routine StCaprini
 !
@@ -60,12 +60,6 @@
       
 ! Input "experimental" data z,w and the list of extrapolation points zeta
 ! size(z)=size(w)=nz, size(zeta)=n_zeta
-c$$$      open(unit=18,file='data_sizes.txt')
-c$$$      read(18,*) nz
-c$$$      read(18,*) n_zeta
-c$$$      read(18,*) NMC 
-c$$$      close(18)
-c      write(6,*) nz,n_zeta,NMC
       allocate(VD(data_max,4))
       open(unit=11,file='exp_data.txt') ! 
       do i=1,data_max
