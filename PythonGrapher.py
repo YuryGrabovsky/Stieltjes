@@ -131,8 +131,8 @@ class StieltjesGraphWindow(Qt.QDialog):
         fZ = self.computeSpectralRep(Z)  #finish computing spectral rep
         #Uncertainty curves
         dataSizes = self.loadFileIntoNestedArrays("data_sizes.txt")
-        NMC = int(dataSizes[1][0])
-        nZeta = int(dataSizes[2][0])
+        NMC = int(dataSizes[2][0])
+        nZeta = int(dataSizes[1][0])
         count = 0
         if NMC > 0:
             MonteCarlo = self.loadFileIntoNestedArrays("WMC.txt")
