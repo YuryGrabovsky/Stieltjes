@@ -25,8 +25,8 @@ class MplCanvas(FigureCanvasQTAgg):
             self.bottomVoigtAxes = self.fig.add_subplot(gs[1,0])
             self.axisDict["TV"] = self.topVoigtAxes
             self.axisDict["BV"] = self.bottomVoigtAxes
-            self.setPlotInfo(self.topVoigtAxes, "Bode Plot", "Freq/Hz", "Z Real/Ohm")
-            self.setPlotInfo(self.bottomVoigtAxes, "Bode Plot", "Freq/Hz", "Z Imag/Ohm)")
+            self.setPlotInfo(self.topVoigtAxes, "Real Part", "Freq/Hz", "Z Real/Ohm")
+            self.setPlotInfo(self.bottomVoigtAxes, "Imaginary Part", "Freq/Hz", "Z Imag/Ohm)")
             self.setPlotInfo(self.topCapriniAxes,"Caprini Function", "Freq/Hz", "")
             self.setPlotInfo(self.bottomCapriniAxes,"Zeros of the Caprini Function", "Freq/Hz", "")
         elif(mode == "Nyquist"):
