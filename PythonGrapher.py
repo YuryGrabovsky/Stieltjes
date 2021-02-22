@@ -178,12 +178,13 @@ class StieltjesGraphWindow(Qt.QDialog):
         #plot original points if extrap is on same curve is on original data.
         if self.sameCurve:
             expData = self.loadFileIntoNestedArrays("exp_data.txt")
-            wOrigX = []
-            wOrigY = []
+            if self.status:
+                wfix = np.transpose(self.loadFileIntoNestedArrays("wfix.txt"))
+                self.graphCanvas.drawLinLinDots("N", wfix[0], wfix[1], "Alternative Data", "red")
+            wOrig = []
             for row in expData:
-                wOrigX.append(row[2])
-                wOrigY.append(row[3])
-            self.graphCanvas.drawLinLinDots("N", wOrigX, wOrigY, "W Original", "black")
+                wOrig.append(complex(row[2], row[3]))
+            self.graphCanvas.drawLinLinDots("N", np.real(wOrig), np.imag(wOrig), "W Original", "black")
 
 
     def computeSpectralRep(self, Z, fZeta):
@@ -202,10 +203,7 @@ class StieltjesGraphWindow(Qt.QDialog):
         fZ = np.matmul(Mt,sk[1:]) #fZ=[] #fZ=sk[0] + M.'* sk[1:]
         fZ = [sk[0] + i for i in fZ]
         return fZ
-        # The extrapolated data may lie on a different curve than the experimental
-        # data, so we do not show the original and the alternative. Instead we only
-        # print the relative discrepancy between the original and the alternative
-        # data.
+
 
     def populateVoigt(self, zetaFZeta, fZeta):
         # fZ exp data [freq,re(Z),im(Z)]; wfix=alternative data
@@ -214,10 +212,9 @@ class StieltjesGraphWindow(Qt.QDialog):
         # EIS(f)=F_spectral(f), WZ(n_zeta,Nr)=monte-carlo
         dataSizes=self.loadFileIntoNestedArrays('data_sizes.txt');
         fZ1Split = self.loadFileIntoNestedArrays("Voigt_data.txt")
-        wfixSplit = self.loadFileIntoNestedArrays("wfix.txt")
         Nr = int(dataSizes[2][0])
         #unpack data
-        freq, fZ1, f1, sk, tk, wfix, zetaFZetaCombined  = [],[],[],[],[],[],[]
+        freq, fZ1, f1, sk, tk, zetaFZetaCombined  = [],[],[],[],[],[]
         for row in fZ1Split:
             freq.append(row[0])
             fZ1.append(complex(row[1], row[2]))
@@ -228,8 +225,6 @@ class StieltjesGraphWindow(Qt.QDialog):
             if i > 0:
                 tk.append(fZeta[i][0])
             sk.append(fZeta[i][1])
-        for row in wfixSplit:
-            wfix.append(complex(row[0], row[1]))
         for row in zetaFZeta:
             zetaFZetaCombined.append(complex(row[1], row[2]))
         #compute M and EIS - to show voigt circuit on graphs.
@@ -255,13 +250,16 @@ class StieltjesGraphWindow(Qt.QDialog):
         for i in range(Nr):
             self.graphCanvas.drawSemiLogX("TV", f1, np.real(WZ[i]), "Uncertainty", "silver")
             self.graphCanvas.drawSemiLogX("BV", f1, np.imag(WZ[i]), "Uncertainty", "silver")
+        if self.status: #alternative data is only printed if status is true.
+            wfix = self.loadFileIntoNestedArrays("wfix.txt")
+            wfix = np.transpose(wfix)
+            self.graphCanvas.drawSemiLogXDots("TV", freq, wfix[0], "Alternative Data","red")
+            self.graphCanvas.drawSemiLogXDots("BV", freq, wfix[1], "Alternative Data","red")
         #upper graph - real part
-        self.graphCanvas.drawSemiLogXDots("TV", freq, np.real(wfix), "Alternative Data","red")
         self.graphCanvas.drawSemiLogXDots("TV", freq, np.real(fZ1), "Data","black")
         self.graphCanvas.drawSemiLogX("TV", f1, np.real(zetaFZetaCombined), "Extrapolation", "black")
         self.graphCanvas.drawSemiLogX("TV", f1, np.real(EIS), "Voigt Circuit", "cyan")
         #lower graph - imaginary part
-        self.graphCanvas.drawSemiLogXDots("BV", freq, np.imag(wfix), "Alternative Data","red")
         self.graphCanvas.drawSemiLogXDots("BV", freq, np.imag(fZ1), "Data","black")
         self.graphCanvas.drawSemiLogX("BV", f1, np.imag(zetaFZetaCombined), "Extrapolation", "black")
         self.graphCanvas.drawSemiLogX("BV", f1, np.imag(EIS), "Voigt Circuit", "cyan")
@@ -308,7 +306,7 @@ class StieltjesGraphWindow(Qt.QDialog):
 
     def detectStatus(self):
         fZeta = self.loadFileIntoNestedArrays("spectral_measure.txt")
-        if(fZeta[0][0] != 0): #determine if caprinis should be shown.
+        if(fZeta[0][0] == 0): #determine if caprinis should be shown.
             return False, fZeta
         else:
             return True, fZeta
