@@ -1,4 +1,3 @@
-
 import sys
 import csv
 import numpy as np
@@ -9,6 +8,11 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationTool
 from matplotlib.gridspec import GridSpec
 from matplotlib.figure import Figure
 
+
+#Same Curve should be set to true if the input data lies on the same curve as the
+#extrapolation data. This is only needed in Nyquist mode, it is true always in
+#Voigt mode regardless the value below.
+SameCurve = False
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent, mode, status, dpi=100):
@@ -111,12 +115,12 @@ class MplCanvas(FigureCanvasQTAgg):
 
 
 class StieltjesGraphWindow(Qt.QDialog):
-    def __init__(self):
+    def __init__(self, sameCurveArg):
         super().__init__()#set up Qt
         self.topLevelLayout = Qt.QHBoxLayout()
         self.graphData = [[],[]] #set by populateData()
         self.mode, zetaFZeta = self.detectMode() #is set by populateData()
-        self.sameCurve = False #set by user. whether the data lies on the extrapolation curve.
+        self.sameCurve = sameCurveArg #set by user. whether the data lies on the extrapolation curve.
         self.status, fZeta = self.detectStatus() #whether to show caprini functions
 
         #setup graphs!
@@ -330,7 +334,7 @@ if __name__ == '__main__':
     # Create the Qt Application
     app = Qt.QApplication(sys.argv)
     # Create and show the form
-    form = StieltjesGraphWindow()
+    form = StieltjesGraphWindow(SameCurve)
     form.show()
     # Run the main Qt loop
     sys.exit(app.exec_())
