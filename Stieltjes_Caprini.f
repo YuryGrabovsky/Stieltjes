@@ -47,11 +47,7 @@
       real*8, allocatable::Cmins(:)
       real*8, allocatable::sigma(:)
 
-<<<<<<< HEAD
       parameter(mar=3.0,npd=1000,mnd=30,data_max=100000)
-=======
-      parameter(mar=3.0,npd=1000,mnd=30,data_max=10000)
->>>>>>> c156709b02157efdf3a060fec4d0703ceab438a3
 ! mar=number of decades to go left past tmim
 ! npd=number of discretization points per decade
 ! nz=number of experimental measurements
