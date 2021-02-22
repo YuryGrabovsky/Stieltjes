@@ -45,16 +45,15 @@
       real*8, allocatable::rtk(:)
       real*8, allocatable::C(:)
       real*8, allocatable::Cmins(:)
-      real*8, allocatable::locmins(:)
       real*8, allocatable::sigma(:)
 
-      parameter(mar=3.0,npd=1000,mnd=30,data_max=10000,NMC=500)
+      parameter(mar=3.0,npd=1000,mnd=30,data_max=100000)
 ! mar=number of decades to go left past tmim
 ! npd=number of discretization points per decade
 ! nz=number of experimental measurements
 ! n_zeta=number of extrapolation points
 ! mnd: maximal number of decades to reserve enough computer memory
-
+      NMC=500
       eye=cmplx(0,1)
       pi=4*atan(1.0d0)
       
@@ -92,7 +91,7 @@
       close(21)
       allocate(zeta(n_zeta))
       zeta=VD(1:n_zeta,1)+eye*VD(1:n_zeta,2)
-
+      deallocate(VD)
 
 ! Data has been read in. Allocate output arrays
 
@@ -103,7 +102,6 @@
       allocate(WMC(NMC,n_zeta))
       allocate(tC(mnd*npd))
       allocate(C(mnd*npd))
-      allocate(locmins(nz))
       allocate(Cmins(nz))
 
 ! Compute results
