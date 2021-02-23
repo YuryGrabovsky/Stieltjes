@@ -50,7 +50,7 @@ Stieltjes_functions.f and the following included 3rd party software:
 - quicksort.f90 by M.J. Rutter (Obtained from https://www.mjr19.org.uk/IT/sorts/)
 
 * I include a python program PythonGrapher, written by Phillip
-  Grabovsky (my son), that reads the output files and presents the
+  Grabovsky that reads the output files and presents the
   results graphically, but of course, the numbers can just as easily be read
   into any other graphing program. Nyquist_plot.jpg shows the output.
   In order to use the PythonGrapher one needs python 3.x and the python

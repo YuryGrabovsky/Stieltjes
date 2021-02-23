@@ -52,7 +52,7 @@ capacitors (no inductances). It also represents the electrochemical impedance
 spectrum of an electrochemical cell. The number of lines in Voigt_data.txt is
 the number of measurements of Z(f) at different frequencies. The output is
 written to several text files (described below). I include a python program
-PythonGrapher.py written by Phillip Grabovsky (my son) that reads the output
+PythonGrapher.py written by Phillip Grabovsky that reads the output
 files and presents the results graphically. (See README for how to run it.)
 Of course, the output of the FORTRAN program can just as easily be read from
 the text files by any other program that has graphing capabilities. 
