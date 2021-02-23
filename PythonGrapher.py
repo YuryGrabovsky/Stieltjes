@@ -12,7 +12,7 @@ from matplotlib.figure import Figure
 #Same Curve should be set to true if the input data lies on the same curve as the
 #extrapolation data. This is only needed in Nyquist mode, it is true always in
 #Voigt mode regardless the value below.
-SameCurve = False
+SameCurve = True
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent, mode, status, dpi=100):
