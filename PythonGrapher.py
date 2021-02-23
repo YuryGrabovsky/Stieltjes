@@ -1,3 +1,14 @@
+#-------------------------------------------------------------------
+#
+# Written by Phillip Grabovsky 02/22/2021
+# This code is distributed under the GNU LGPL license.
+#
+# This code graphs the output produced by the Fortran code 
+# in the Stieltjes project. Fortran writes text files containing numbers
+# This grapher reads these files and builds the plots. See README files
+# for this project.
+#
+# ------------------------------------------------------------------
 import sys
 import csv
 import numpy as np
