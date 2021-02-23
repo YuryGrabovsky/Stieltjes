@@ -1771,7 +1771,7 @@ c subroutine getpoles. It is larger than the largest pole of g(z).
       b=a
       f0=phifun(a,g,s0,gpoles,gwts,n,tst)
       prod=1.0
-      maxiter=50 ! if maxiter is reached an error will be thrown by 
+      maxiter=100 ! if maxiter is reached an error will be thrown by 
       ii=0
       if (f0>0) then
          do while ((prod>=0).and.(ii<=maxiter))
@@ -1795,6 +1795,7 @@ c subroutine getpoles. It is larger than the largest pole of g(z).
       mit=200
       rt=BRphi(a,b,tol,mit,vat,ni,er,g,s0,gpoles,gwts,n,tst)
       if (.not.(er==0)) then
+c         write(6,*) er,a,b,rt,vat
          STOP 'Failure to find a pole of f(z) between poles of g(z)'
       end if
       getapole=rt
