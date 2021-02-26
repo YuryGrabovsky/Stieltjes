@@ -199,7 +199,7 @@ class StieltjesGraphWindow(Qt.QDialog):
             wOrig = []
             for row in expData:
                 wOrig.append(complex(row[2], row[3]))
-            self.graphCanvas.drawLinLinDots("N", np.real(wOrig), np.imag(wOrig), "W Original", "black")
+            self.graphCanvas.drawLinLinDots("N", np.real(wOrig), np.imag(wOrig), "Original Data", "black")
 
 
     def computeSpectralRep(self, Z, fZeta):
@@ -271,11 +271,11 @@ class StieltjesGraphWindow(Qt.QDialog):
             self.graphCanvas.drawSemiLogXDots("TV", freq, wfix[0], "Alternative Data","red")
             self.graphCanvas.drawSemiLogXDots("BV", freq, wfix[1], "Alternative Data","red")
         #upper graph - real part
-        self.graphCanvas.drawSemiLogXDots("TV", freq, np.real(fZ1), "Data","black")
+        self.graphCanvas.drawSemiLogXDots("TV", freq, np.real(fZ1), "Original Data","black")
         self.graphCanvas.drawSemiLogX("TV", f1, np.real(zetaFZetaCombined), "Extrapolation", "black")
         self.graphCanvas.drawSemiLogX("TV", f1, np.real(EIS), "Voigt Circuit", "cyan")
         #lower graph - imaginary part
-        self.graphCanvas.drawSemiLogXDots("BV", freq, np.imag(fZ1), "Data","black")
+        self.graphCanvas.drawSemiLogXDots("BV", freq, np.imag(fZ1), "Original Data","black")
         self.graphCanvas.drawSemiLogX("BV", f1, np.imag(zetaFZetaCombined), "Extrapolation", "black")
         self.graphCanvas.drawSemiLogX("BV", f1, np.imag(EIS), "Voigt Circuit", "cyan")
 
