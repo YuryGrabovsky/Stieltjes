@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------
 #
-# Written by Phillip Grabovsky 02/22/2021
+# Written by Phillip Grabovsky 03/20/2022
 # This code is distributed under the GNU LGPL license.
 #
 # This code graphs the output produced by the Fortran code 
@@ -9,6 +9,8 @@
 # for this project.
 #
 # ------------------------------------------------------------------
+
+
 import sys
 import csv
 import numpy as np
@@ -23,7 +25,7 @@ from matplotlib.figure import Figure
 #Same Curve should be set to true if the input data lies on the same curve as the
 #extrapolation data. This is only needed in Nyquist mode, it is true always in
 #Voigt mode regardless the value below.
-SameCurve = True
+SameCurve = False
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent, mode, status, dpi=100):
@@ -199,7 +201,7 @@ class StieltjesGraphWindow(Qt.QDialog):
             wOrig = []
             for row in expData:
                 wOrig.append(complex(row[2], row[3]))
-            self.graphCanvas.drawLinLinDots("N", np.real(wOrig), np.imag(wOrig), "Original Data", "black")
+            self.graphCanvas.drawLinLinDots("N", np.real(wOrig), np.imag(wOrig), "W Original", "black")
 
 
     def computeSpectralRep(self, Z, fZeta):
@@ -271,11 +273,11 @@ class StieltjesGraphWindow(Qt.QDialog):
             self.graphCanvas.drawSemiLogXDots("TV", freq, wfix[0], "Alternative Data","red")
             self.graphCanvas.drawSemiLogXDots("BV", freq, wfix[1], "Alternative Data","red")
         #upper graph - real part
-        self.graphCanvas.drawSemiLogXDots("TV", freq, np.real(fZ1), "Original Data","black")
+        self.graphCanvas.drawSemiLogXDots("TV", freq, np.real(fZ1), "Data","black")
         self.graphCanvas.drawSemiLogX("TV", f1, np.real(zetaFZetaCombined), "Extrapolation", "black")
         self.graphCanvas.drawSemiLogX("TV", f1, np.real(EIS), "Voigt Circuit", "cyan")
         #lower graph - imaginary part
-        self.graphCanvas.drawSemiLogXDots("BV", freq, np.imag(fZ1), "Original Data","black")
+        self.graphCanvas.drawSemiLogXDots("BV", freq, np.imag(fZ1), "Data","black")
         self.graphCanvas.drawSemiLogX("BV", f1, np.imag(zetaFZetaCombined), "Extrapolation", "black")
         self.graphCanvas.drawSemiLogX("BV", f1, np.imag(EIS), "Voigt Circuit", "cyan")
 
@@ -287,12 +289,15 @@ class StieltjesGraphWindow(Qt.QDialog):
             tC.append(row[0])
             C.append(row[1])
         self.graphCanvas.drawSemiLogX("TC",[tC[0],tC[len(tC)-1]],[0,0],"","red") #draw baseline
-        self.graphCanvas.drawSemiLogX("TC", tC, C, "", "blue" ) #draw caprini
+        self.graphCanvas.drawSemiLogX("TC", tC, C, "", "blue" )   #draw caprini
         self.graphCanvas.drawSemiLogX("BC",[tC[0],tC[len(tC)-1]],[0,0],"","red") #draw baseline
-        self.graphCanvas.drawSemiLogX("BC",tC, C, "", "blue")   #draw caprini mins
+        self.graphCanvas.drawSemiLogX("BC",tC, C, "", "blue")    #draw caprini mins
         #scale the bottom graph to show zeros
         CMin, CMax = self.getgraphScale(C)
-        self.graphCanvas.setGraphScale("BC",min(tC), max(tC), CMin, CMax)
+        tMin = min(tC)
+        tMax = max(tC)
+        self.graphCanvas.setGraphScale("BC",tMin, tMax, CMin, CMax)
+        self.graphCanvas.axisDict["TC"].set_xlim(tMin, tMax)
 
     def getgraphScale(self, C): #find local minima, and figure out suitable graph scale.
         diffs = np.diff(C)
