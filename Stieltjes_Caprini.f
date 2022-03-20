@@ -11,7 +11,7 @@
 ! Given nz distinct points z in the UHP and approximate values w of
 ! a Stieltjes function f(z) we compute p in V(z) which is certifiably
 ! closest to wfix(=w on the output). wfix is a slight perturbation of the actual data w so 
-! p is optimal for wfix. We display the graph of Caprini function an macro 
+! p is optimal for wfix. We display the graph of Caprini function on macro 
 ! and micro-scales to certify optimality.
 ! The local minima tk, of the Caprini function is the support of the 
 ! spectral measure of the corresponding Stieltjes function f(z) satisfying
@@ -44,7 +44,6 @@
       real*8, allocatable::tC(:)
       real*8, allocatable::rtk(:)
       real*8, allocatable::C(:)
-      real*8, allocatable::Cmins(:)
       real*8, allocatable::sigma(:)
 
       parameter(mar=3.0,npd=1000,mnd=30,data_max=100000)
@@ -95,14 +94,13 @@
 
 ! Data has been read in. Allocate output arrays
 
-      allocate(p(nz))
-      allocate(sigma(nz))
-      allocate(rtk(nz))
-      allocate(W_extr(n_zeta))
-      allocate(WMC(NMC,n_zeta))
-      allocate(tC(mnd*npd))
-      allocate(C(mnd*npd))
-      allocate(Cmins(nz))
+      allocate(p(nz)) ! projection of data onto the interpolation body
+      allocate(sigma(nz)) ! weights if the spectral measure
+      allocate(rtk(nz)) ! nodes of the spectral measure
+      allocate(W_extr(n_zeta)) ! extrapolation via the recursive algorithm
+      allocate(WMC(NMC,n_zeta)) ! Monte Carlo uncertainty quantification
+      allocate(tC(mnd*npd)) ! discretizartion of the t-space for C(t)
+      allocate(C(mnd*npd)) ! C(t)
 
 ! Compute results
 
@@ -110,8 +108,7 @@
      $               p,W_extr,WMC,status,
      $               g,s0,rtk,sigma,ns,tC,C,ntC)
 
-! fzeta(j)=f(zeta(j)), given by an explicit representation
-! W_extr(j)=f(zeta(j)), given by a recursion algorithm
+! W_extr(j)=f(zeta(j)), given by an explicit representation
 ! WMC(i,j)=f_{i}(zeta(j)) for ith random realization f_i(z) of f
 ! t4C(s) is the discretization of (0,+infty) on log scale
 ! C(s)=C(t4C(s)) is the Caprini function

@@ -52,8 +52,6 @@
       real*8, allocatable::rtk(:)
       real*8, allocatable::sigma(:)
       real*8, allocatable::C(:)
-      real*8, allocatable::Cmins(:)
-      real*8, allocatable::locmins(:)
 
       parameter(mar=4.0,npd=1000,mnd=30)
 ! mar=number of decades to go left past tmim
@@ -105,15 +103,13 @@ c      write(6,*) 'The number of measurements is',nz
 
 ! Data has been read in. Allocate output arrays
 
-      allocate(p(nz))
-      allocate(sigma(nz))
-      allocate(rtk(nz))
-      allocate(W_extr(n_zeta))
-      allocate(WMC(NMC,n_zeta))
-      allocate(tC(mnd*npd))
-      allocate(C(mnd*npd))
-      allocate(locmins(nz))
-      allocate(Cmins(nz))
+      allocate(p(nz)) ! projection of data onto the interpolation body
+      allocate(sigma(nz)) ! weights of the spectral measure
+      allocate(rtk(nz)) ! nodes of the spectral measure
+      allocate(W_extr(n_zeta)) ! extrapolation via the recursive algorithm
+      allocate(WMC(NMC,n_zeta)) ! Monte Carlo uncertainty quantification
+      allocate(tC(mnd*npd)) ! discretizartion of the t-space for C(t)
+      allocate(C(mnd*npd)) ! C(t)
 
 ! Compute results
 
