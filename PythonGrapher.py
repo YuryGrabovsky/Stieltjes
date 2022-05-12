@@ -25,12 +25,12 @@ from matplotlib.figure import Figure
 #Same Curve should be set to true if the input data lies on the same curve as the
 #extrapolation data. This is only needed in Nyquist mode, it is true always in
 #Voigt mode regardless the value below.
-SameCurve = False
+SameCurve = True
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent, mode, status, dpi=100):
         if status:
-            self.initializeNormally(parent, mode, dpi=100)
+            self.initializeNormally(parent, mode, dpi=100) 
         else:
             self.disableCaprinis(parent, mode, dpi=100)
         super(MplCanvas, self).__init__(self.fig)
@@ -163,7 +163,7 @@ class StieltjesGraphWindow(Qt.QDialog):
         elif self.mode == "Voigt":
             self.populateVoigt(zetaFZeta, fZeta)
         if(self.status):
-            self.populateCaprinis()
+            self.populateCaprinis() 
 
 
     def populateNyquist(self, zetaFZeta, fZeta): #update nyquist plot

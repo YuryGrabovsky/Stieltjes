@@ -142,9 +142,11 @@ c tC,C are lists of length ntC representing the Caprini function C(j)=C(tC(j))
             p_direct=p_direct+sigma(i)/(rtk(i)-z)
          end do
          dist_direct=distCn(p_direct,p,nz)
-c         write(6,*) '|p-p_dr|=',dist_direct,'|p-p_indr|=',dist_indirect
+!         write(6,*) '|p-p_dr|=',dist_direct,'|p-p_indr|=',dist_indirect
+! It looks like in most cases directly computed spectral measure is better,
 
          if (dist_direct>dist_indirect) then ! Caprini SM is better
+            write(6,*) 'Spectral measure comes from Caprini'
             ns=numlm
             g=sk(1)
             if (tk(1)==0) then
@@ -1717,7 +1719,7 @@ c
 ! Both inputs and outputs: g,s0,t,s,n
       implicit none
       real*8 g,s0,t(n+1),s(n+1),s1,s2,tst,gst,nu1,xs(n+2)
-      real*8 term1,term2,Tmax,x1,x2,getapole
+      real*8 term1,term2,Tmax,x1,x2,getapole,spectmax,tn
       real*8, allocatable::gpoles(:)
       real*8, allocatable::gwts(:)
       integer n,i
@@ -1734,7 +1736,10 @@ c
 ! if n>0 then s is not returned, only t is computed
       xs(1)=0
       xs(2:n+1)=t(1:n)
-      Tmax=max(2*t(n),(tst+2*sum(s(1:n))+2*s0)/(g+1))
+!      Tmax=max(2*t(n),(tst+2*sum(s(1:n))+2*s0)/(g+1)) ! old Tmax
+      tn=t(n)
+      Tmax=spectmax(s,n,tn,s0,tst,g) ! New much smaller Tmax
+      Tmax=Tmax+1.0 ! Make a little room if Tmax is too close to the actual zero of phi(x)
       xs(n+2)=Tmax
       allocate(gpoles(n))
       allocate(gwts(n))
@@ -1771,7 +1776,7 @@ c subroutine getpoles. It is larger than the largest pole of g(z).
       b=a
       f0=phifun(a,g,s0,gpoles,gwts,n,tst)
       prod=1.0
-      maxiter=100 ! if maxiter is reached an error will be thrown by 
+      maxiter=100 ! if maxiter is reached an error will be thrown by BRphi
       ii=0
       if (f0>0) then
          do while ((prod>=0).and.(ii<=maxiter))
@@ -1845,3 +1850,19 @@ c indicated representation.
       call nnls(CC,nz2,lmc,d,sigmas,rnorm,v,indx,mode)
       return
       end subroutine getweights0
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c We compute a better estimate for Tmax for the spectral representation
+c of f(z) computed in getpoles routine. Better Tmax solves
+c (g+1)*T^2-(sum(s)+s0+tst+tn*(g+1))*T+tn*(s0+tst)
+
+      real*8 function spectmax(s,n,tn,s0,tst,g)
+      implicit none
+      integer n
+      real*8 s(n),tn,s0,tst,g,b,c
+      b=sum(s)+s0+tst+tn*(g+1)
+      c=tn*(s0+tst)
+      spectmax=(b+sqrt(b*b-4*(g+1)*c))/(2*(g+1))
+      return
+      end
