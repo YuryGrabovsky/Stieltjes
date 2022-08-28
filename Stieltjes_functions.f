@@ -806,6 +806,11 @@ c         write(6,*) 'Data lost validity. Projecting',nz
       rep=realpart(p)
       imp=imagpart(p)
       MH=sqrt(maxval(rep*rep+imp*imp))
+      if (MH==0) then ! return H=0
+!         write(6,*) 'emergency exit 0',nz
+         H=0/z
+         return
+      end if      
       call reorder(z0,p,nz)
       c1=z0(1) 
       h1=p(1)
@@ -829,9 +834,8 @@ c Apply the recursive procedure, but avoid divisions by zero
       imh1=imagpart(h1)
       reh1=realpart(h1)
       imc1h1=imagpart(c1*h1)
-
       if (imc1h1/(MC*MH)<tol) then ! imag(c1*h1)=0 => H=-c1*h1/z
-c         write(6,*) 'emergency exit 1',nz
+!         write(6,*) 'emergency exit 1',nz
          mass=realpart(c1*h1)
          H=mass/z
          return
@@ -1502,7 +1506,7 @@ c carried passively to be passed to other subroutines down the stream.
       logical bad(nc),good(nc),Nval,Pval
       logical, allocatable::mask(:)
       
-      parameter(stol=1.d-16,tol=2.0d-15)
+      parameter(stol=1.d-11,tol=2.0d-15)
 
 c First we eliminate zero denominators in the NP matrices
       MC=maxval(imagpart(c))
@@ -1776,7 +1780,7 @@ c subroutine getpoles. It is larger than the largest pole of g(z).
       b=a
       f0=phifun(a,g,s0,gpoles,gwts,n,tst)
       prod=1.0
-      maxiter=100 ! if maxiter is reached an error will be thrown by BRphi
+      maxiter=110 ! if maxiter is reached an error will be thrown by BRphi
       ii=0
       if (f0>0) then
          do while ((prod>=0).and.(ii<=maxiter))
@@ -1800,7 +1804,6 @@ c subroutine getpoles. It is larger than the largest pole of g(z).
       mit=200
       rt=BRphi(a,b,tol,mit,vat,ni,er,g,s0,gpoles,gwts,n,tst)
       if (.not.(er==0)) then
-c         write(6,*) er,a,b,rt,vat
          STOP 'Failure to find a pole of f(z) between poles of g(z)'
       end if
       getapole=rt
